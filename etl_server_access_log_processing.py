@@ -1,8 +1,11 @@
 #Import the libraries
 from datetime import timedelta
+#DAG object to instantiate a DAG
 from airflow.models import DAG
+#Operators
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash_operator import BashOperator
+
 from airflow.utils.dates import days_ago
 import requests
 
@@ -18,7 +21,9 @@ def download_file():
     with requests.get(url, stream=True) as response:
         # Raise an exception for HTTP errors
         response.raise_for_status()
+        # Opening a local file in binary write mode
         with open(input_file, 'wb') as file:
+            # Writing the content to the local file in chunks
             for chunk in response.iter_content(chunk_size=8192):
                 file.write(chunk)
     print(f"File downloaded successfully: {input_file}")
@@ -27,7 +32,7 @@ def download_file():
 def extract():
     global input_file
     print("Inside Extract")
-    # Read the contents of the file into a string
+    # Reading the contents of the file into a string
     with open(input_file, 'r') as infile, \
             open(extracted_file, 'w') as outfile:
         for line in infile:
@@ -51,6 +56,7 @@ def transform():
 def load():
     global transformed_file, output_file
     print("Inside Load")
+    #save array to csv file
     with open(transformed_file, 'r') as infile, \
             open(output_file, 'w') as outfile:
         for line in infile:
